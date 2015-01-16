@@ -311,7 +311,15 @@ function boot_extract()
 
     printhl "Extracting '$BOOT_TAR$file_file_ext' ..."
     mkdir -p $PAYLOAD_DIR/boot
-    cat $BOOT_TAR$file_file_ext | $file_uncompress_cmd | tar -xC $PAYLOAD_DIR/boot > /dev/null 2>&1
+
+	cpio_check="$(zcat $BOOT_TAR${file_file_ext} |grep  -a -b -o 'TRAILER!!!'|cut -d: -f1)"
+	if [[ ! -z $cpio_check ]];then
+	cd "$PAYLOAD_DIR/boot"
+		zcat $BOOT_TAR$file_file_ext | cpio -i --make-directories --no-absolute-filenames  > /dev/null 2>&1
+		cd -
+	else
+		cat $BOOT_TAR$file_file_ext | $file_uncompress_cmd | tar -xC $PAYLOAD_DIR/boot > /dev/null 2>&1
+	fi
 }
 
 function recovery_extract()
@@ -327,7 +335,15 @@ function recovery_extract()
    
     printhl "Extracting '$RECOVERY_TAR$file_file_ext' ..."
     mkdir -p $PAYLOAD_DIR/recovery
-    cat $RECOVERY_TAR$file_file_ext | $file_uncompress_cmd | tar -xC $PAYLOAD_DIR/recovery > /dev/null 2>&1
+
+	cpio_check="$(zcat $RECOVERY_TAR${file_file_ext} |grep  -a -b -o 'TRAILER!!!'|cut -d: -f1)"
+	if [[ ! -z $cpio_check ]];then
+	cd "$PAYLOAD_DIR/recovery"
+		zcat $RECOVERY_TAR$file_file_ext | cpio -i --make-directories --no-absolute-filenames  > /dev/null 2>&1
+		cd -
+	else
+		cat $RECOVERY_TAR$file_file_ext | $file_uncompress_cmd | tar -xC $PAYLOAD_DIR/recovery > /dev/null 2>&1
+	fi
 }
 
 function payload_extract()
